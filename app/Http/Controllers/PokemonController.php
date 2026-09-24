@@ -71,8 +71,11 @@ class PokemonController extends Controller
         $validated = $request->validate($this->validationRules());
 
         if ($request->hasFile('sprite_image')) {
-            $path = $request->file('sprite_image')->store('sprites/pokemon', 'public');
-            $validated['sprite_image'] = $path;
+            $uploadedUrl = \Cloudinary::upload(
+                $request->file('sprite_image')->getRealPath(),
+                ['folder' => 'pokedex/pokemon']
+            )->getSecurePath();
+            $validated['sprite_image'] = $uploadedUrl;
         }
 
         $pokemon = Pokemon::create($validated);
@@ -124,11 +127,11 @@ class PokemonController extends Controller
         $validated = $request->validate($this->validationRules($pokemon->id));
 
         if ($request->hasFile('sprite_image')) {
-            if ($pokemon->sprite_image) {
-                \Storage::disk('public')->delete($pokemon->sprite_image);
-            }
-            $path = $request->file('sprite_image')->store('sprites/pokemon', 'public');
-            $validated['sprite_image'] = $path;
+            $uploadedUrl = \Cloudinary::upload(
+                $request->file('sprite_image')->getRealPath(),
+                ['folder' => 'pokedex/pokemon']
+            )->getSecurePath();
+            $validated['sprite_image'] = $uploadedUrl;
         }
 
         $pokemon->update($validated);

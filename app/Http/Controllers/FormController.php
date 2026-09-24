@@ -46,8 +46,11 @@ class FormController extends Controller
         ]);
 
         if ($request->hasFile('sprite_image')) {
-            $path = $request->file('sprite_image')->store('sprites/forms', 'public');
-            $validated['sprite_image'] = $path;
+            $uploadedUrl = \Cloudinary::upload(
+                $request->file('sprite_image')->getRealPath(),
+                ['folder' => 'pokedex/forms']
+            )->getSecurePath();
+            $validated['sprite_image'] = $uploadedUrl;
         }
 
         $form = Form::create($validated);
@@ -86,13 +89,13 @@ class FormController extends Controller
             'spe' => 'required|integer|min:0|max:65535',
         ]);
 
-    if ($request->hasFile('sprite_image')) {
-        if ($form->sprite_image) {
-            \Storage::disk('public')->delete($form->sprite_image);
+        if ($request->hasFile('sprite_image')) {
+            $uploadedUrl = \Cloudinary::upload(
+                $request->file('sprite_image')->getRealPath(),
+                ['folder' => 'pokedex/forms']
+            )->getSecurePath();
+            $validated['sprite_image'] = $uploadedUrl;
         }
-        $path = $request->file('sprite_image')->store('sprites/forms', 'public');
-        $validated['sprite_image'] = $path;
-    }
 
         $form->update($validated);
         $form->load('type1', 'type2');
